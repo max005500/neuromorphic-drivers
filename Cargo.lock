@@ -197,23 +197,7 @@ dependencies = [
 
 [[package]]
 name = "neuromorphic-drivers"
-version = "0.16.1"
-dependencies = [
- "bincode",
- "libc",
- "libusb1-sys",
- "neuromorphic-types 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "paste",
- "rusb",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "neuromorphic-drivers"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16bbca3ed99e973cc3eb8066a46d432790ee4b1fe1270bd49b9e58f4b8cc89e4"
+version = "0.16.2"
 dependencies = [
  "bincode",
  "libc",
@@ -446,7 +430,7 @@ name = "python"
 version = "0.0.0"
 dependencies = [
  "cc",
- "neuromorphic-drivers 0.16.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "neuromorphic-drivers",
  "numpy",
  "paste",
  "pyo3",

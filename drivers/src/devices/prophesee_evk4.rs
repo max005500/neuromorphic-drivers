@@ -126,6 +126,7 @@ impl device::Usb for Device {
         (0x04B4, 0x00F4),
         (0x04B4, 0x00F5),
         (0x31F7, 0x0003),
+        (0x31F7, 0x0004),
         (0x1409, 0x8E00),
     ];
 
@@ -181,7 +182,7 @@ impl device::Usb for Device {
         {
             return Ok(None);
         }
-        if type_buffer[0] != 0x31 {
+        if type_buffer[0] != EVK3_IMX636_TYPE && type_buffer[0] != EVK3_IMX646_TYPE {
             return Ok(None);
         }
         handle.write_bulk(
@@ -245,17 +246,17 @@ impl device::Usb for Device {
             0x0301,
             0x0409,
             &[
-                // Prophesee (UTF-16)
+                // "Prophesee" (UTF-16)
                 &[
                     b'P', 0x00, b'r', 0x00, b'o', 0x00, b'p', 0x00, b'h', 0x00, b'e', 0x00, b's',
                     0x00, b'e', 0x00, b'e', 0x00,
                 ],
-               // CenturyArks (UTF-16)
+                // "CenturyArks" (UTF-16)
                 &[
                     b'C', 0x00, b'e', 0x00, b'n', 0x00, b't', 0x00, b'u', 0x00, b'r', 0x00, b'y',
                     0x00, b'A', 0x00, b'r', 0x00, b'k', 0x00, b's', 0x00,
                 ],
-                // IDS Imaging Development Systems GmbH (UTF-16)
+                // "IDS Imaging Development Systems GmbH" (UTF-16)
                 &[
                     b'I', 0x00, b'D', 0x00, b'S', 0x00, b' ', 0x00, b'I', 0x00, b'm', 0x00, b'a',
                     0x00, b'g', 0x00, b'i', 0x00, b'n', 0x00, b'g', 0x00, b' ', 0x00, b'D', 0x00,
@@ -274,9 +275,16 @@ impl device::Usb for Device {
             0x0302,
             0x0409,
             &[
-                // EVK4 (UTF-16)
+                // "EVK4" (UTF-16)
                 &[b'E', 0x00, b'V', 0x00, b'K', 0x00, b'4', 0x00],
-                // UE-39B0XCP (UTF-16)
+                // "SilkyEvCam HD v03.09.00C" (UTF-16)
+                &[
+                    b'S', 0x00, b'i', 0x00, b'l', 0x00, b'k', 0x00, b'y', 0x00, b'E', 0x00, b'v',
+                    0x00, b'C', 0x00, b'a', 0x00, b'm', 0x00, b' ', 0x00, b'H', 0x00, b'D', 0x00,
+                    b' ', 0x00, b'v', 0x00, b'0', 0x00, b'3', 0x00, b'.', 0x00, b'0', 0x00, b'9',
+                    0x00, b'.', 0x00, b'0', 0x00, b'0', 0x00, b'C', 0x00,
+                ],
+                // "UE-39B0XCP" (UTF-16)
                 &[
                     b'U', 0x00, b'E', 0x00, b'-', 0x00, b'3', 0x00, b'9', 0x00, b'B', 0x00, b'0',
                     0x00, b'X', 0x00, b'C', 0x00, b'P',
@@ -915,7 +923,7 @@ impl device::Usb for Device {
         })
     }
 
-    fn next_with_timeout(&self, timeout: &std::time::Duration) -> Option<usb::BufferView> {
+    fn next_with_timeout(&'_ self, timeout: &std::time::Duration) -> Option<usb::BufferView<'_>> {
         self.ring.next_with_timeout(timeout)
     }
 
@@ -1338,6 +1346,9 @@ where
     flag: flag::Flag<IntoError, IntoWarning>,
     register_mutex: std::sync::Arc<std::sync::Mutex<()>>,
 }
+
+const EVK3_IMX636_TYPE: u8 = 0x31;
+const EVK3_IMX646_TYPE: u8 = 0x35;
 
 struct RuntimeRegister {
     address: u32,
