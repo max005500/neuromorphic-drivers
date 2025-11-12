@@ -123,7 +123,7 @@ pub enum Error {
     #[error("Logic version not supported (neuromorphic-drivers expects version 18, the camera runs on version {0})")]
     LogicVersion(u32),
 
-    #[error("Logic patch not supported (neuromorphic-drivers expects version 1, the camera runs on version {0})")]
+    #[error("Logic patch not supported (neuromorphic-drivers expects version 1 or 2, the camera runs on version {0})")]
     LogicPatch(u32),
 
     #[error("Short SPI read to {module_address:#04X}:{parameter_address:#04X} (expected {expected} bytes, read {count} bytes)")]
@@ -294,7 +294,7 @@ impl device::Usb for Device {
             return Err(Error::LogicVersion(logic_version));
         }
         let logic_patch = LOGIC_PATCH.get(&handle)?;
-        if logic_patch != 1 {
+        if logic_patch != 1 && logic_patch != 2 {
             return Err(Error::LogicPatch(logic_patch));
         }
         let logic_clock_register = LOGIC_CLOCK.get(&handle)?;
@@ -479,7 +479,7 @@ impl device::Usb for Device {
         })
     }
 
-    fn next_with_timeout(&self, timeout: &std::time::Duration) -> Option<usb::BufferView> {
+    fn next_with_timeout(&'_ self, timeout: &std::time::Duration) -> Option<usb::BufferView<'_>> {
         self.ring.next_with_timeout(timeout)
     }
 
