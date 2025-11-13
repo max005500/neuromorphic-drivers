@@ -7,6 +7,10 @@ on:
     types:
       - published
 
+concurrency:
+    group: "build"
+    cancel-in-progress: true
+
 env:
   CIBW_SKIP: cp38-* pp* *i686 *win32
 
