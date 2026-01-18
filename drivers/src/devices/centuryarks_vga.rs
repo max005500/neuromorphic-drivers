@@ -7,7 +7,6 @@ use crate::usb;
 
 use device::Usb;
 
-
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub struct Biases {
     // constrast
@@ -23,7 +22,6 @@ pub struct Biases {
     pub pr: u16,
     pub refr: u16,
 }
-
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub struct RateLimiter {
@@ -89,7 +87,6 @@ where
 }
 
 impl device::Usb for Device {
-
     type Adapter = adapters::evt3::Adapter;
 
     type Configuration = Configuration;
@@ -106,7 +103,7 @@ impl device::Usb for Device {
         height: 480,
         default_configuration: Self::Configuration {
             biases: Biases {
-               // constrast
+                // constrast
                 diff_on: 0x180,
                 diff: 0x128,
                 diff_off: 0x0DE,
@@ -174,7 +171,7 @@ impl device::Usb for Device {
         self.configuration_updater.update(configuration);
     }
 
-      fn open<IntoError, IntoWarning>(
+    fn open<IntoError, IntoWarning>(
         serial_or_bus_number_and_address: device::SerialOrBusNumberAndAddress,
         configuration: Self::Configuration,
         usb_configuration: &usb::Configuration,
@@ -221,7 +218,6 @@ impl device::Usb for Device {
                     0x00, b'A', 0x00, b'r', 0x00, b'k', 0x00, b's', 0x00,
                 ],
                 // "SilkyEvCam"
-
             ],
             TIMEOUT,
         )?;
@@ -244,10 +240,11 @@ impl device::Usb for Device {
             &[
                 // "SilkyEvCam Gen3.1 v03.09.00C"
                 &[
-                    b'S', 0x00, b'i', 0x00, b'l', 0x00, b'k', 0x00, b'y', 0x00, b'E', 0x00, b'v', 0x00, 
-                    b'C', 0x00, b'a', 0x00, b'm', 0x00, b' ', 0x00, b'G', 0x00, b'e', 0x00, b'n', 0x00,
-                    b'3', 0x00, b'.', 0x00, b'1', 0x00, b' ', 0x00, b'v', 0x00, b'0', 0x00, b'3', 0x00,
-                    b'.', 0x00, b'0', 0x00, b'9', 0x00, b'.', 0x00, b'0', 0x00, b'0', 0x00, b'C', 0x00,
+                    b'S', 0x00, b'i', 0x00, b'l', 0x00, b'k', 0x00, b'y', 0x00, b'E', 0x00, b'v',
+                    0x00, b'C', 0x00, b'a', 0x00, b'm', 0x00, b' ', 0x00, b'G', 0x00, b'e', 0x00,
+                    b'n', 0x00, b'3', 0x00, b'.', 0x00, b'1', 0x00, b' ', 0x00, b'v', 0x00, b'0',
+                    0x00, b'3', 0x00, b'.', 0x00, b'0', 0x00, b'9', 0x00, b'.', 0x00, b'0', 0x00,
+                    b'0', 0x00, b'C', 0x00,
                 ],
             ],
             TIMEOUT,
@@ -308,11 +305,11 @@ impl device::Usb for Device {
             TIMEOUT,
         )?; // temperature sensor
 
-        // from 
+        // from
         // 1. connection test
         // Ref: Read(0x00000800...) x 3
         for _ in 0..3 {
-            let _ = Unknown0800 { value: 0 }.read(&handle); 
+            let _ = Unknown0800 { value: 0 }.read(&handle);
         }
 
         // 2. first shutdown y Reset
@@ -330,17 +327,20 @@ impl device::Usb for Device {
             en_vdda: 0,
             en_vddc: 0,
             en_vddd: 0,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:0,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         // reapet in log
         // AtisControl { value: 0 }.write(&handle)?;
@@ -350,83 +350,98 @@ impl device::Usb for Device {
             en_vdda: 0,
             en_vddc: 0,
             en_vddd: 0,
-            sensor_soft_reset: 1, 
+            sensor_soft_reset: 1,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:0,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         AtisControl {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 0,
-            sensor_soft_reset: 1, 
+            sensor_soft_reset: 1,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:0,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
         AtisControl {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 1, 
+            sensor_soft_reset: 1,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:0,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         AtisControl {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:0,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         AtisControl {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:1,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,sisley_hvga_remap_bypass:0,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 1,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         // Ref: Write(0x00000000, 0x00001006) -> Bit 12 ON (MASTER_MODE)
-        
+
         // 4.  clocks config (PLL) - Bloque 0x07xx
         Unknown0768 { value: 0x08010000 }.write(&handle)?;
         Unknown076C { value: 0x00000000 }.write(&handle)?;
@@ -445,7 +460,8 @@ impl device::Usb for Device {
             enable_out_of_fov: 0,
             th_recovery_bypass: 0,
             ccam_id: 0,
-        }.write(&handle)?;
+        }
+        .write(&handle)?;
 
         // 6. configuration PHY and sistem
         Unknown1500 { value: 0x0000000D }.write(&handle)?;
@@ -456,37 +472,39 @@ impl device::Usb for Device {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:1,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,
-            sisley_hvga_remap_bypass:1,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 1,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 1,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
-         AtisControl {
+        AtisControl {
             en_vdda: 0,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:0,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:1,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,
-            sisley_hvga_remap_bypass:1,
-            td_rstn:0,
-            use_ext_start:0
-        }.write(&handle)?;
-
-
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 1,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 1,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         Unknown074C { value: 0x00000002 }.write(&handle)?;
 
@@ -503,7 +521,7 @@ impl device::Usb for Device {
         Unknown0200 { value: 0x00000018 }.write(&handle)?;
         Unknown0200 { value: 0x0000001A }.write(&handle)?;
 
-        let _ = Unknown0218 { value: 0 }.read(&handle); 
+        let _ = Unknown0218 { value: 0 }.read(&handle);
 
         Unknown0240 { value: 0x00140501 }.write(&handle)?;
 
@@ -562,44 +580,47 @@ impl device::Usb for Device {
         Unknown0248 { value: 0x000000C9 }.write(&handle)?;
 
         // --- START SEQUENCE ---
-        // from openeb/hal_psee_plugins/include/devices/gen31/gen31_evk3_issd.h 
+        // from openeb/hal_psee_plugins/include/devices/gen31/gen31_evk3_issd.h
 
         // Ref: WriteField(0x0000, 0x00001107, 0x1) -> activate VDDA (Bit 0)
         // Ref: WriteField(..., 0x00041107, 0x40000) -> activate TD_RSTN (Bit 18)
         // Ref: WriteField(..., 0x000C1107, 0x80000) -> activate EM_RSTN (Bit 19)
         // Valor final acumulado: 0x1106 | 1 | 0x40000 | 0x80000 = 0x000C1107
-         AtisControl {
+        AtisControl {
             en_vdda: 1,
             en_vddc: 1,
             en_vddd: 1,
-            sensor_soft_reset: 0, 
+            sensor_soft_reset: 0,
             in_evt_no_blocking_mode: 0,
-            em_rstn:1,
-            en_ext_ctrl_rstb:0,
-            flip_x_en:0,flip_y_en:0,
-            master_mode:1,
-            sensor_tb_iobuf_en_n:0,
-            sensor_tb_pe_rst_n:0,
-            sisley_hvga_remap_bypass:1,
-            td_rstn:1,
-            use_ext_start:0
-        }.write(&handle)?;
+            em_rstn: 1,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 1,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 1,
+            td_rstn: 1,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
         // Ref: Write(0x0008, 0x00000300) -> HOST_IF_EN (Bit 8) + STEREO_MERGE (Bit 9)
         Ccam2Control {
             host_if_en: 1,
             stereo_merge_enable: 1,
-            th_recovery_bypass:0,
-            enable_out_of_fov:0,
+            th_recovery_bypass: 0,
+            enable_out_of_fov: 0,
             ccam_id: 0,
-        }.write(&handle)?;
+        }
+        .write(&handle)?;
 
         Unknown0238 { value: 0x00000001 }.write(&handle)?;
         Unknown0204 { value: 0x0000002B }.write(&handle)?;
 
         std::thread::sleep(std::time::Duration::from_micros(250));
 
-        Unknown0248 { value: 0x000000C8 }.write(&handle)?; 
+        Unknown0248 { value: 0x000000C8 }.write(&handle)?;
 
         let handle = std::sync::Arc::new(handle);
         let error_flag = flag.clone();
@@ -638,7 +659,7 @@ impl device::Usb for Device {
             vendor_and_product_id,
             serial,
         })
-    }  
+    }
 
     fn next_with_timeout(&'_ self, timeout: &std::time::Duration) -> Option<usb::BufferView<'_>> {
         self.ring.next_with_timeout(timeout)
@@ -681,7 +702,6 @@ impl device::Usb for Device {
     }
 }
 
-
 impl From<rusb::Error> for Error {
     fn from(error: rusb::Error) -> Self {
         usb::Error::from(error).into()
@@ -693,7 +713,6 @@ fn update_configuration(
     previous_configuration: Option<&Configuration>,
     configuration: &Configuration,
 ) -> Result<(), Error> {
-
     Ok(())
 }
 
@@ -714,8 +733,6 @@ fn request(
     buffer.truncate(read);
     Ok(buffer)
 }
-
-
 
 struct RuntimeRegister {
     address: u32,
@@ -765,7 +782,7 @@ trait Register {
         Ok(u32::from_le_bytes(result[16..20].try_into().unwrap()))
     }
 
- fn write(&self, handle: &rusb::DeviceHandle<rusb::Context>) -> Result<(), Error> {
+    fn write(&self, handle: &rusb::DeviceHandle<rusb::Context>) -> Result<(), Error> {
         let address = self.address();
         let value = self.value();
         request(
@@ -804,7 +821,6 @@ impl Register for RuntimeRegister {
         }
     }
 }
-
 
 struct ConfigurationUpdaterContext<IntoError, IntoWarning>
 where
@@ -907,7 +923,6 @@ register! { EvtRateControl, 0x0018, {
     // Bits 11-15 reserved
     t_drop_factor: 16..32,          // 16-31: T_DROP_FACTOR
 } }
-
 
 // --- graphic registers / Unknown para la inicialización ---
 // needed for Blocks 0x02xx, 0x07xx, 0x15xx and Biases (0x03xx)
