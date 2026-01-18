@@ -557,13 +557,13 @@ impl device::Usb for Device {
         Unknown0340 { value: 0x590004FF }.write(&handle)?;
         Unknown0344 { value: 0x590000FF }.write(&handle)?;
         Unknown0348 { value: 0x59014DFF }.write(&handle)?;
-        Unknown034C { value: 0x7900571E }.write(&handle)?;
-        Unknown0350 { value: 0x79125C35 }.write(&handle)?;
-        Unknown0354 { value: 0x7902CE29 }.write(&handle)?;
-        Unknown0358 { value: 0x71003DD6 }.write(&handle)?;
-        Unknown035C { value: 0x51034FB1 }.write(&handle)?;
-        Unknown0360 { value: 0x51004FD4 }.write(&handle)?;
-        Unknown0364 { value: 0x510006D4 }.write(&handle)?;
+        BiasDiffOff { value: 0x7900571E }.write(&handle)?;
+        BiasDiffOn  { value: 0x79125C35 }.write(&handle)?;
+        BiasDiff    { value: 0x7902CE29 }.write(&handle)?;
+        BiasFO      { value: 0x71003DD6 }.write(&handle)?;
+        BiasPr      { value: 0x51034FB1 }.write(&handle)?;
+        BiasRefr    { value: 0x51004FD4 }.write(&handle)?;
+        BiasHpf     { value: 0x510006D4 }.write(&handle)?;
         Unknown0368 { value: 0x71000054 }.write(&handle)?;
 
         // 8. final enable
@@ -708,11 +708,98 @@ impl From<rusb::Error> for Error {
     }
 }
 
+// Simplified structure for Reverse Engineering implementation.
+// We only need the "Magic Header" and the bit-shift amount.
+//
+struct BiasGen31Config {
+    header_mask: u32, // Example: 0x79000000
+    shift: u8,        // Example: 0 for Diffs, 8 for PR/FO/HPF
+}
+
+macro_rules! update_bias {
+    ($name:ident, $register:ident, $config:expr, $handle:ident, $previous_biases:ident, $biases:expr) => {
+        // 1. Change Detection (Optimization)
+        // Only write to USB if the value has actually changed since the last update.
+        if match $previous_biases {
+            Some(prev) => prev.$name != $biases.$name,
+            None => true,
+        } {
+            // 2. Construct Raw Value
+            let val = $biases.$name as u32;
+            
+            // Formula: Header | (Value << Shift)
+            // Example Diff: 0x79000000 | (300 << 0) = 0x7900012C
+            // Example PR:   0x51000000 | (12 << 8)  = 0x51000C00
+            let final_value = $config.header_mask | (val << $config.shift);
+
+            // 3. USB Write
+            // Use generic 32-bit 'value' field to allow full payload control.
+            $register { value: final_value }.write($handle)?;
+        }
+    };
+}
+
 fn update_configuration(
     handle: &rusb::DeviceHandle<rusb::Context>,
     previous_configuration: Option<&Configuration>,
     configuration: &Configuration,
 ) -> Result<(), Error> {
+    let previous_biases = previous_configuration.map(|c| &c.biases);
+    let biases = &configuration.biases;
+
+    // --- COMPARATOR GROUP (Header 0x79, Shift 0) ---
+    // These registers accept the value directly in the lower bits (0-11).
+    
+    update_bias!(
+        diff_off, BiasDiffOff,
+        BiasGen31Config { header_mask: 0x79000000, shift: 0 },
+        handle, previous_biases, biases
+    );
+
+    update_bias!(
+        diff_on, BiasDiffOn,
+        BiasGen31Config { header_mask: 0x79000000, shift: 0 },
+        handle, previous_biases, biases
+    );
+
+    update_bias!(
+        diff, BiasDiff,
+        BiasGen31Config { header_mask: 0x79000000, shift: 0 },
+        handle, previous_biases, biases
+    );
+
+    // --- FILTER GROUP (Header 0x71, Shift 8) ---
+    // Sniffing data (e.g., value 0x3D00) showed the value resides in the 2nd byte.
+    
+    update_bias!(
+        fo, BiasFO, // Assumes your 'biases' struct has a 'fo' field
+        BiasGen31Config { header_mask: 0x71000000, shift: 8 },
+        handle, previous_biases, biases
+    );
+
+    // --- FRONT-END GROUP (Header 0x51, Shift 8) ---
+    // PR, Refr, and HPF all demonstrated 0x51 headers with shifted values in the logs.
+
+    update_bias!(
+        pr, BiasPr,
+        BiasGen31Config { header_mask: 0x51000000, shift: 8 },
+        handle, previous_biases, biases
+    );
+
+    update_bias!(
+        refr, BiasRefr,
+        BiasGen31Config { header_mask: 0x51000000, shift: 8 },
+        handle, previous_biases, biases
+    );
+
+    update_bias!(
+        hpf, BiasHpf,
+        BiasGen31Config { header_mask: 0x51000000, shift: 8 },
+        handle, previous_biases, biases
+    );
+
+    // NOTE: 'reqpuy' and 'blk' were omitted as they were not confirmed via sniffing.
+    // Using Gen4 addresses (0x1XXX) for them would likely fail on this hardware.
     Ok(())
 }
 
@@ -977,11 +1064,18 @@ register! { Unknown033C, 0x033c, { value: 0..32 } }
 register! { Unknown0340, 0x0340, { value: 0..32 } }
 register! { Unknown0344, 0x0344, { value: 0..32 } }
 register! { Unknown0348, 0x0348, { value: 0..32 } }
-register! { Unknown034C, 0x034c, { value: 0..32 } }
-register! { Unknown0350, 0x0350, { value: 0..32 } }
-register! { Unknown0354, 0x0354, { value: 0..32 } }
-register! { Unknown0358, 0x0358, { value: 0..32 } }
-register! { Unknown035C, 0x035c, { value: 0..32 } }
-register! { Unknown0360, 0x0360, { value: 0..32 } }
-register! { Unknown0364, 0x0364, { value: 0..32 } }
 register! { Unknown0368, 0x0368, { value: 0..32 } }
+
+// Defined with 'value: 0..32' to allow full control over the 32-bit payload.
+// --- COMPARATOR GROUP (Header 0x79) ---
+register! { BiasDiffOff, 0x034C, { value: 0..32 } } // Negative Contrast Threshold
+register! { BiasDiffOn,  0x0350, { value: 0..32 } } // Positive Contrast Threshold
+register! { BiasDiff,    0x0354, { value: 0..32 } } // Reference Level
+
+// --- FILTER GROUP (Header 0x71) ---
+register! { BiasFO,      0x0358, { value: 0..32 } } // Source Follower / Low Pass Filter
+
+// --- FRONT-END GROUP (Header 0x51) ---
+register! { BiasPr,      0x035C, { value: 0..32 } } // Photoreceptor Gain
+register! { BiasRefr,    0x0360, { value: 0..32 } } // Refractory Period (Dead time)
+register! { BiasHpf,     0x0364, { value: 0..32 } } // High Pass Filter
