@@ -98,7 +98,7 @@ impl device::Usb for Device {
     const VENDOR_AND_PRODUCT_IDS: &'static [(u16, u16)] = &[(0x31F7, 0x0002)];
 
     const PROPERTIES: Self::Properties = Self::Properties {
-        name: "Prophesee VGA",
+        name: "CenturyArks VGA",
         width: 640,
         height: 480,
         default_configuration: Self::Configuration {
