@@ -95,7 +95,7 @@ impl device::Usb for Device {
 
     type Properties = properties::Camera<Self::Configuration>;
 
-    const VENDOR_AND_PRODUCT_IDS: &'static [(u16, u16)] = &[(0x31F7, 0x0002)];
+    const VENDOR_AND_PRODUCT_IDS: &'static [(u16, u16)] = &[(0x31F7, 0x0002),(0x03fd,0x5832)]; // here you could add the vendor id of the prophesee  vga camera
 
     const PROPERTIES: Self::Properties = Self::Properties {
         name: "CenturyArks VGA",
@@ -312,10 +312,29 @@ impl device::Usb for Device {
             let _ = Unknown0800 { value: 0 }.read(&handle);
         }
 
-        // 2. first shutdown y Reset
+        // 2. first shutdown and Reset
         // Ref: Write(0x00000000, 0x00000000)
         // AtisControl { value: 0 }.write(&handle)?;
+        AtisControl {
+            en_vdda: 0,
+            en_vddc: 0,
+            en_vddd: 0,
+            sensor_soft_reset: 0,
+            in_evt_no_blocking_mode: 0,
+            em_rstn: 0,
+            en_ext_ctrl_rstb: 0,
+            flip_x_en: 0,
+            flip_y_en: 0,
+            master_mode: 0,
+            sensor_tb_iobuf_en_n: 0,
+            sensor_tb_pe_rst_n: 0,
+            sisley_hvga_remap_bypass: 0,
+            td_rstn: 0,
+            use_ext_start: 0,
+        }
+        .write(&handle)?;
 
+ 
         // Ref: Write(0x0000000C, 0x00000000) -> 0x00000001
         Ccam2Trigger { soft_reset: 0 }.write(&handle)?;
         Ccam2Trigger { soft_reset: 1 }.write(&handle)?;
@@ -821,6 +840,7 @@ fn request(
     Ok(buffer)
 }
 
+#[allow(dead_code)]
 struct RuntimeRegister {
     address: u32,
     value: u32,
@@ -831,6 +851,7 @@ trait Register {
 
     fn value(&self) -> u32;
 
+    #[allow(dead_code)]
     fn offset(&self, registers: u32) -> RuntimeRegister;
 
     #[allow(dead_code)]
@@ -958,7 +979,7 @@ register! { AtisControl, 0x0000, {
     en_vddd: 2..3,                  // 2: EN_VDDD
     sensor_soft_reset: 3..4,        // 3: SENSOR_SOFT_RESET
     in_evt_no_blocking_mode: 4..5,  // 4: IN_EVT_NO_BLOCKING_MODE
-    // Bits 5-7: reserved/ mapa hollow
+    // Bits 5-7: reserved/ hollow map
     sisley_hvga_remap_bypass: 8..9, // 8: SISLEY_HVGA_REMAP_BYPASS
     // Bits 9-11: reserved
     master_mode: 12..13,            // 12: MASTER_MODE
@@ -966,7 +987,7 @@ register! { AtisControl, 0x0000, {
     use_ext_start: 14..15,          // 14: USE_EXT_START
     sensor_tb_iobuf_en_n: 15..16,   // 15: SENSOR_TB_IOBUF_EN_N
     sensor_tb_pe_rst_n: 16..17,     // 16: SENSOR_TB_PE_RST_N
-    // Bit 17: Reservado
+    // Bit 17: reserved
     td_rstn: 18..19,                // 18: TD_RSTN
     em_rstn: 19..20,                // 19: EM_RSTN
     en_ext_ctrl_rstb: 20..21,       // 20: EN_EXT_CTRL_RSTB
@@ -1011,7 +1032,7 @@ register! { EvtRateControl, 0x0018, {
     t_drop_factor: 16..32,          // 16-31: T_DROP_FACTOR
 } }
 
-// --- graphic registers / Unknown para la inicialización ---
+// --- graphic registers / Unknown for inicialización ---
 // needed for Blocks 0x02xx, 0x07xx, 0x15xx and Biases (0x03xx)
 register! { Unknown0800, 0x0800, { value: 0..32 } }
 register! { Unknown0768, 0x0768, { value: 0..32 } }
